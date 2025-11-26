@@ -16,7 +16,8 @@ class HomeController extends StatefulWidget {
   State<HomeController> createState() => _HomeControllerState();
 }
 
-class _HomeControllerState extends State<HomeController> {
+class _HomeControllerState extends State<HomeController>
+    with TickerProviderStateMixin {
   int _currentIndex = 0;
   late List<TaskModel> tasks;
   late List<HabitModel> habits;
@@ -80,70 +81,7 @@ class _HomeControllerState extends State<HomeController> {
   void _toggleTheme() => setState(() => darkMode = !darkMode);
   void _onNav(int idx) => setState(() => _currentIndex = idx);
 
-  @override
-  Widget build(BuildContext context) {
-    final pages = [
-      TasksPage(
-        tasks: tasks,
-        onToggle: toggleTask,
-        onDelete: deleteTask,
-        onAdd: addTask,
-      ),
-      HabitsPage(
-        habits: habits,
-        onToggleToday: toggleHabitToday,
-        onDelete: deleteHabit,
-        onAdd: addHabit,
-      ),
-      ProgressPage(tasks: tasks, habits: habits),
-      const WeatherPage(),
-    ];
-
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      theme: darkMode
-          ? ThemeData.dark(useMaterial3: true)
-          : ThemeData(useMaterial3: true),
-      home: Scaffold(
-        appBar: AppBar(
-          title: const Text('Foco Diário'),
-          actions: [
-            IconButton(
-              icon: Icon(darkMode ? Icons.dark_mode : Icons.light_mode),
-              onPressed: _toggleTheme,
-            ),
-          ],
-        ),
-        body: pages[_currentIndex],
-        bottomNavigationBar: NavigationBar(
-          selectedIndex: _currentIndex,
-          onDestinationSelected: _onNav,
-          destinations: const [
-            NavigationDestination(icon: Icon(Icons.list), label: 'Tarefas'),
-            NavigationDestination(icon: Icon(Icons.repeat), label: 'Hábitos'),
-            NavigationDestination(
-              icon: Icon(Icons.show_chart),
-              label: 'Progresso',
-            ),
-            NavigationDestination(icon: Icon(Icons.cloud), label: 'Clima'),
-          ],
-        ),
-        floatingActionButton: _currentIndex == 0
-            ? FloatingActionButton(
-                onPressed: () => _dialogAddTask(context),
-                child: const Icon(Icons.add),
-              )
-            : _currentIndex == 1
-            ? FloatingActionButton(
-                onPressed: () => _dialogAddHabit(context),
-                child: const Icon(Icons.add),
-              )
-            : null,
-      ),
-    );
-  }
-
-  // Dialogs for adding
+  // Dialogs extracted from old code to maintain behavior
   Future<void> _dialogAddTask(BuildContext ctx) async {
     final titleCtrl = TextEditingController();
     final descCtrl = TextEditingController();
@@ -161,6 +99,7 @@ class _HomeControllerState extends State<HomeController> {
                 controller: titleCtrl,
                 decoration: const InputDecoration(labelText: 'Título'),
               ),
+              const SizedBox(height: 8),
               TextField(
                 controller: descCtrl,
                 decoration: const InputDecoration(labelText: 'Descrição'),
@@ -283,6 +222,77 @@ class _HomeControllerState extends State<HomeController> {
             child: const Text('Salvar'),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildFab() {
+    return FloatingActionButton.extended(
+      onPressed: () {
+        if (_currentIndex == 0) {
+          _dialogAddTask(context);
+        } else if (_currentIndex == 1) {
+          _dialogAddHabit(context);
+        }
+      },
+      icon: const Icon(Icons.add),
+      label: const Text('Novo'),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final pages = [
+      TasksPage(
+        tasks: tasks,
+        onToggle: toggleTask,
+        onDelete: deleteTask,
+        onAdd: addTask,
+      ),
+      HabitsPage(
+        habits: habits,
+        onToggleToday: toggleHabitToday,
+        onDelete: deleteHabit,
+        onAdd: addHabit,
+      ),
+      ProgressPage(tasks: tasks, habits: habits),
+      const WeatherPage(),
+    ];
+
+    return AnimatedTheme(
+      data: darkMode
+          ? ThemeData.dark(useMaterial3: true)
+          : ThemeData(useMaterial3: true),
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Foco Diário'),
+          actions: [
+            IconButton(
+              icon: Icon(darkMode ? Icons.dark_mode : Icons.light_mode),
+              onPressed: _toggleTheme,
+              tooltip: 'Alternar tema',
+            ),
+          ],
+        ),
+        body: AnimatedSwitcher(
+          duration: const Duration(milliseconds: 300),
+          child: pages[_currentIndex],
+        ),
+        bottomNavigationBar: NavigationBar(
+          selectedIndex: _currentIndex,
+          onDestinationSelected: _onNav,
+          height: 64,
+          destinations: const [
+            NavigationDestination(icon: Icon(Icons.task_alt), label: 'Tarefas'),
+            NavigationDestination(icon: Icon(Icons.repeat), label: 'Hábitos'),
+            NavigationDestination(
+              icon: Icon(Icons.show_chart),
+              label: 'Progresso',
+            ),
+            NavigationDestination(icon: Icon(Icons.cloud), label: 'Clima'),
+          ],
+        ),
+        floatingActionButton: _buildFab(),
       ),
     );
   }

@@ -5,10 +5,10 @@ class WeatherPage extends StatefulWidget {
   const WeatherPage({Key? key}) : super(key: key);
 
   @override
-  State<WeatherPage> createState() => _WeatherPageState();
+  State<WeatherPage> createState() => _WeatherState();
 }
 
-class _WeatherPageState extends State<WeatherPage> {
+class _WeatherState extends State<WeatherPage> {
   final _ctrl = TextEditingController(text: 'São Paulo');
   bool loading = false;
   String? error;
@@ -37,8 +37,12 @@ class _WeatherPageState extends State<WeatherPage> {
 
   @override
   Widget build(BuildContext context) {
+    final city = data?['city'] ?? '--';
+    final temp = data?['temp'] != null ? '${data!['temp']}°C' : '--';
+    final desc = data?['description'] ?? '';
+
     return Padding(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(16),
       child: Column(
         children: [
           Row(
@@ -57,7 +61,7 @@ class _WeatherPageState extends State<WeatherPage> {
             ],
           ),
           const SizedBox(height: 12),
-          if (loading) const CircularProgressIndicator(),
+          if (loading) const Center(child: CircularProgressIndicator()),
           if (error != null)
             Padding(
               padding: const EdgeInsets.all(8),
@@ -65,24 +69,59 @@ class _WeatherPageState extends State<WeatherPage> {
             ),
           if (data != null && !loading)
             Card(
+              elevation: 2,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
               child: Padding(
-                padding: const EdgeInsets.all(12),
-                child: Column(
+                padding: const EdgeInsets.all(16),
+                child: Row(
                   children: [
-                    Text(
-                      '${data!['city']}',
-                      style: Theme.of(context).textTheme.titleLarge,
+                    // left column: temp and icon
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            Colors.indigo.shade50,
+                            Colors.indigo.shade100,
+                          ],
+                        ),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Column(
+                        children: [
+                          Icon(
+                            Icons.wb_sunny,
+                            size: 36,
+                            color: Colors.orange.shade400,
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            temp,
+                            style: Theme.of(context).textTheme.headlineSmall,
+                          ),
+                        ],
+                      ),
                     ),
-                    const SizedBox(height: 8),
-                    Text(
-                      '${data!['description']}',
-                      style: const TextStyle(fontSize: 16),
-                    ),
-                    const SizedBox(height: 8),
-                    Text('Temperatura: ${data!['temp']}°C'),
-                    const SizedBox(height: 4),
-                    Text(
-                      'Umidade: ${data!['humidity']} • Vento: ${data!['wind']}',
+                    const SizedBox(width: 16),
+                    // right column
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            city,
+                            style: Theme.of(context).textTheme.titleLarge,
+                          ),
+                          const SizedBox(height: 8),
+                          Text(desc, style: const TextStyle(fontSize: 16)),
+                          const SizedBox(height: 8),
+                          Text(
+                            'Umidade: ${data!['humidity']} • Vento: ${data!['wind']}',
+                          ),
+                        ],
+                      ),
                     ),
                   ],
                 ),

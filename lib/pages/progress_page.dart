@@ -35,26 +35,84 @@ class ProgressPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final tProg = (_todayTasksProgress() * 100).round();
     final hProg = (_todayHabitsProgress() * 100).round();
+
     return Padding(
       padding: const EdgeInsets.all(16),
       child: Column(
         children: [
-          Text(
-            'Progresso diário',
-            style: Theme.of(context).textTheme.titleLarge,
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  'Progresso diário',
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
+              ),
+            ],
           ),
-          const SizedBox(height: 12),
-          LinearProgressIndicator(value: _todayTasksProgress(), minHeight: 12),
-          const SizedBox(height: 8),
-          Text('Tarefas: $tProg%'),
-          const SizedBox(height: 20),
-          LinearProgressIndicator(
-            value: _todayHabitsProgress(),
-            minHeight: 12,
-            color: Colors.orange,
+          const SizedBox(height: 18),
+          Card(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            elevation: 2,
+            child: Padding(
+              padding: const EdgeInsets.all(14),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Tarefas',
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                  const SizedBox(height: 8),
+                  LinearProgressIndicator(
+                    value: _todayTasksProgress(),
+                    minHeight: 12,
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text('Completo: $tProg%'),
+                      Text(
+                        '${tasks.where((t) {
+                          final d = DateTime.now();
+                          return true;
+                        }).length} total',
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
           ),
-          const SizedBox(height: 8),
-          Text('Hábitos: $hProg%'),
+          const SizedBox(height: 16),
+          Card(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            elevation: 2,
+            child: Padding(
+              padding: const EdgeInsets.all(14),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Hábitos',
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                  const SizedBox(height: 8),
+                  LinearProgressIndicator(
+                    value: _todayHabitsProgress(),
+                    minHeight: 12,
+                  ),
+                  const SizedBox(height: 8),
+                  Text('Completo: $hProg%'),
+                ],
+              ),
+            ),
+          ),
         ],
       ),
     );

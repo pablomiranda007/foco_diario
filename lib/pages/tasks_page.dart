@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/task_model.dart';
+import '../widgets/task_tile.dart';
 
 class TasksPage extends StatelessWidget {
   final List<TaskModel> tasks;
@@ -19,51 +20,51 @@ class TasksPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final sorted = [...tasks]..sort((a, b) => a.dateTime.compareTo(b.dateTime));
     return Padding(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(16),
       child: Column(
         children: [
+          // Header
+          Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Tarefas',
+                      style: Theme.of(context).textTheme.titleLarge,
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      '${sorted.length} tarefas',
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
           Expanded(
             child: sorted.isEmpty
-                ? const Center(
-                    child: Text('Nenhuma tarefa. Toque no + para criar.'),
+                ? Center(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: const [
+                        Icon(Icons.task_alt, size: 64, color: Colors.grey),
+                        SizedBox(height: 12),
+                        Text('Nenhuma tarefa. Toque no botão + para criar.'),
+                      ],
+                    ),
                   )
                 : ListView.builder(
                     itemCount: sorted.length,
                     itemBuilder: (ctx, i) {
                       final t = sorted[i];
-                      return Card(
-                        child: ListTile(
-                          leading: CircleAvatar(
-                            child: Text(t.title.characters.first.toUpperCase()),
-                          ),
-                          title: Text(
-                            t.title,
-                            style: TextStyle(
-                              decoration: t.done
-                                  ? TextDecoration.lineThrough
-                                  : null,
-                            ),
-                          ),
-                          subtitle: Text(
-                            '${t.category} • ${t.dateTime.toLocal()}',
-                          ),
-                          trailing: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              IconButton(
-                                icon: const Icon(
-                                  Icons.delete,
-                                  color: Colors.red,
-                                ),
-                                onPressed: () => onDelete(t.id),
-                              ),
-                              Checkbox(
-                                value: t.done,
-                                onChanged: (_) => onToggle(t.id),
-                              ),
-                            ],
-                          ),
-                        ),
+                      return TaskTile(
+                        task: t,
+                        onToggle: () => onToggle(t.id),
+                        onDelete: () => onDelete(t.id),
                       );
                     },
                   ),

@@ -22,75 +22,120 @@ class HabitsPage extends StatelessWidget {
 
   int _streak(HabitModel h) {
     if (h.completions.isEmpty) return 0;
+
     final dates = h.completions.map((s) => DateTime.parse(s)).toList()..sort();
+
     int streak = 0;
     var cur = DateTime.now();
     cur = DateTime(cur.year, cur.month, cur.day);
+
     for (int i = 0; ; i++) {
       final check = cur.subtract(Duration(days: i));
       final key =
           '${check.year}-${check.month.toString().padLeft(2, '0')}-${check.day.toString().padLeft(2, '0')}';
-      if (h.completions.contains(key))
+
+      if (h.completions.contains(key)) {
         streak++;
-      else
+      } else {
         break;
+      }
     }
+
     return streak;
   }
 
   @override
   Widget build(BuildContext context) {
     final today = _todayKey();
+
     return Padding(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(16),
       child: Column(
         children: [
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  'Hábitos',
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
+              ),
+              // small legend
+              Text(
+                '${habits.length}',
+                style: Theme.of(context).textTheme.bodyLarge,
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
           Expanded(
             child: habits.isEmpty
                 ? const Center(
-                    child: Text('Nenhum hábito. Toque no + para criar.'),
+                    child: Text(
+                      'Nenhum hábito registrado.\nToque no botão + para adicionar.',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(fontSize: 16, color: Colors.black54),
+                    ),
                   )
                 : ListView.builder(
                     itemCount: habits.length,
                     itemBuilder: (ctx, i) {
                       final h = habits[i];
                       final done = h.completions.contains(today);
-                      return Card(
-                        child: ListTile(
-                          leading: CircleAvatar(
-                            child: Text(h.title.characters.first.toUpperCase()),
+
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 12),
+                        child: Card(
+                          elevation: 2,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(14),
                           ),
-                          title: Text(
-                            h.title,
-                            style: TextStyle(
-                              decoration: done
-                                  ? TextDecoration.lineThrough
-                                  : null,
+                          child: ListTile(
+                            leading: CircleAvatar(
+                              radius: 22,
+                              backgroundColor: Colors.indigo.shade50,
+                              child: Text(
+                                h.title.characters.first.toUpperCase(),
+                                style: const TextStyle(
+                                  color: Colors.indigo,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
                             ),
-                          ),
-                          subtitle: Text(
-                            '${h.time} • Sequência: ${_streak(h)}d',
-                          ),
-                          trailing: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              IconButton(
-                                icon: const Icon(
-                                  Icons.delete,
-                                  color: Colors.red,
-                                ),
-                                onPressed: () => onDelete(h.id),
+                            title: Text(
+                              h.title,
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                                decoration: done
+                                    ? TextDecoration.lineThrough
+                                    : null,
                               ),
-                              IconButton(
-                                icon: Icon(
-                                  done
-                                      ? Icons.check_circle
-                                      : Icons.check_circle_outline,
-                                  color: done ? Colors.green : null,
+                            ),
+                            subtitle: Text(
+                              '${h.time} • Sequência: ${_streak(h)}d',
+                            ),
+                            trailing: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                IconButton(
+                                  icon: const Icon(
+                                    Icons.delete_outline,
+                                    color: Colors.red,
+                                  ),
+                                  onPressed: () => onDelete(h.id),
                                 ),
-                                onPressed: () => onToggleToday(h.id),
-                              ),
-                            ],
+                                IconButton(
+                                  icon: Icon(
+                                    done
+                                        ? Icons.check_circle
+                                        : Icons.check_circle_outline,
+                                    color: done ? Colors.green : Colors.grey,
+                                  ),
+                                  onPressed: () => onToggleToday(h.id),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                       );
